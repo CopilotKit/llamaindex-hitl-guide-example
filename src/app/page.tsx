@@ -22,6 +22,38 @@ export default function CopilotKitPage() {
     },
   });
 
+  
+
+  return (
+    <main style={{ "--copilot-kit-primary-color": themeColor } as CopilotKitCSSProperties}>
+      <YourMainContent themeColor={themeColor} />
+      <CopilotSidebar
+        clickOutsideToClose={false}
+        defaultOpen={true}
+        labels={{
+          title: "Popup Assistant",
+          initial: "👋 Hi! This agent can draft essays with a Human-in-the-Loop review.\n\nTry asking: \"Write an essay about the future of AI.\"\nIt will generate a draft for you to review in the chat.\n- Click **Approve Draft** to save it below.\n- Click **Try Again** to request changes.\n\nAs you interact, the UI updates to reflect the agent's **state**, **tool calls**, and **progress**."
+        }}
+      />
+    </main>
+  );
+}
+
+// State of the agent, make sure this aligns with your agent's state.
+type AgentState = {
+  essay: string;
+}
+
+function YourMainContent({ themeColor }: { themeColor: string }) {
+  // 🪁 Shared State: https://docs.copilotkit.ai/coagents/shared-state
+  const {state, setState} = useCoAgent<AgentState>({
+    name: "sample_agent",
+    initialState: {
+      essay: "",
+    },
+  })
+
+  // 🪁 HITL Essay Action: updates shared state on approval
   useCopilotAction({
     name: "write_essay",
     available: "remote",
@@ -32,22 +64,28 @@ export default function CopilotKitPage() {
     followUp: false,
     renderAndWaitForResponse: ({ args, respond, status }) => {
       return (
-        <div>
+        <div className="text-(--copilot-kit-secondary-contrast-color)">
           <Markdown content={args.draft || 'Preparing your draft...'} />
           <div className={`flex gap-4 pt-4 ${status !== "executing" ? "hidden" : ""}`}>
             <button
               onClick={() => respond?.("CANCEL")}
               disabled={status !== "executing"}
-              className="border p-2 rounded-xl w-full"
+              className="bg-gray-100 hover:bg-gray-200 border border-gray-900/5 text-gray-500 p-2 rounded-xl w-full transition-colors duration-300 ease-out"
             >
-              Try Again
+              Ignore Draft
             </button>
             <button
-              onClick={() => respond?.("SEND")}
+              onClick={() => {
+                setState({
+                  ...state,
+                  essay: args.draft || "",
+                });
+                respond?.("SEND");
+              }}
               disabled={status !== "executing"}
-              className="bg-blue-500 text-white p-2 rounded-xl w-full"
+              className="bg-blue-500 hover:bg-blue-600 border border-gray-900/5 text-white p-2 rounded-xl w-full transition-colors duration-300 ease-out"
             >
-              Approve Draft
+              Accept Draft
             </button>
           </div>
         </div>
@@ -56,98 +94,21 @@ export default function CopilotKitPage() {
   });
 
   return (
-    <main style={{ "--copilot-kit-primary-color": themeColor } as CopilotKitCSSProperties}>
-      <YourMainContent themeColor={themeColor} />
-      <CopilotSidebar
-        clickOutsideToClose={false}
-        defaultOpen={true}
-        labels={{
-          title: "Popup Assistant",
-          initial: "👋 Hi, there! You're chatting with an agent. This agent comes with a few tools to get you started.\n\nFor example you can try:\n- **Frontend Tools**: \"Set the theme to orange\"\n- **Shared State**: \"Write a proverb about AI\"\n- **Generative UI**: \"Get the weather in SF\"\n- **Write an essay**: \"Write an essay about the future of AI\"\n\nAs you interact with the agent, you'll see the UI update in real-time to reflect the agent's **state**, **tool calls**, and **progress**."
-        }}
-      />
-    </main>
-  );
-}
-
-// State of the agent, make sure this aligns with your agent's state.
-type AgentState = {
-  proverbs: string[];
-}
-
-function YourMainContent({ themeColor }: { themeColor: string }) {
-  // 🪁 Shared State: https://docs.copilotkit.ai/coagents/shared-state
-  const {state, setState} = useCoAgent<AgentState>({
-    name: "sample_agent",
-    initialState: {
-      proverbs: [
-        "CopilotKit may be new, but its the best thing since sliced bread.",
-      ],
-    },
-  })
-
-  // 🪁 Frontend Actions: https://docs.copilotkit.ai/coagents/frontend-actions
-  useCopilotAction({
-    name: "add_proverb",
-    parameters: [{
-      name: "proverb",
-      description: "The proverb to add. Make it witty, short and concise.",
-      required: true,
-    }],
-    handler: ({ proverb }) => {
-      setState({
-        ...state,
-        proverbs: [...state?.proverbs || [], proverb],
-      });
-    },
-  });
-
-  //🪁 Generative UI: https://docs.copilotkit.ai/coagents/generative-ui
-  useCopilotAction({
-    name: "get_weather",
-    description: "Get the weather for a given location.",
-    available: "disabled",
-    parameters: [
-      { name: "location", type: "string", required: true },
-    ],
-    render: ({ args }) => {
-      return <WeatherCard location={args.location} themeColor={themeColor} />
-    },
-    followUp: false,
-  });
-
-  return (
     <div
       style={{ backgroundColor: themeColor }}
-      className="h-screen w-screen flex justify-center items-center flex-col transition-colors duration-300"
+      className="h-screen w-screen flex justify-center items-center flex-col transition-colors duration-300 ease-out"
     >
       <div className="bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-xl max-w-2xl w-full">
-        <h1 className="text-4xl font-bold text-white mb-2 text-center">Proverbs</h1>
-        <p className="text-gray-200 text-center italic mb-6">This is a demonstrative page, but it could be anything you want! 🪁</p>
+        <h1 className="text-4xl font-bold text-white mb-2 text-center">Essay</h1>
+        <p className="text-gray-200 text-center italic mb-6">Ask the assistant to draft an essay, then approve it to save below.</p>
         <hr className="border-white/20 my-6" />
-        <div className="flex flex-col gap-3">
-          {state.proverbs?.map((proverb, index) => (
-            <div 
-              key={index} 
-              className="bg-white/15 p-4 rounded-xl text-white relative group hover:bg-white/20 transition-all"
-            >
-              <p className="pr-8">{proverb}</p>
-              <button 
-                onClick={() => setState({
-                  ...state,
-                  proverbs: state.proverbs?.filter((_, i) => i !== index),
-                })}
-                className="absolute right-3 top-3 opacity-0 group-hover:opacity-100 transition-opacity 
-                  bg-red-500 hover:bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center"
-              >
-                ✕
-              </button>
-            </div>
-          ))}
+        <div className="bg-white/10 p-4 rounded-xl text-white">
+          {state.essay ? (
+            <Markdown content={state.essay} />
+          ) : (
+            <p className="text-white/80 italic">No essay yet. Ask the assistant to write one!</p>
+          )}
         </div>
-        {state.proverbs?.length === 0 && <p className="text-center text-white/80 italic my-8">
-          No proverbs yet. Ask the assistant to add some!
-        </p>}
       </div>
     </div>
   );
