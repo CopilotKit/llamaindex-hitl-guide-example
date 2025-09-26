@@ -1,11 +1,18 @@
-# CopilotKit <> LlamaIndex Starter
+# CopilotKit <> LlamaIndex Guide Example: Human-in-the-Loop (HITL)
 
-This is a starter template for building AI agents using [LlamaIndex](https://llamaindex.com) and [CopilotKit](https://copilotkit.ai). It provides a modern Next.js application with an integrated investment analyst agent that can research stocks, analyze market data, and provide investment insights.
+This repo demonstrates Human-in-the-Loop (HITL) with [LlamaIndex](https://llamaindex.com) and [CopilotKit](https://copilotkit.ai). It includes a Next.js app connected to a LlamaIndex agent that drafts an essay via a tool (`write_essay`), renders the draft in the chat for review, and waits for you to either accept or ignore the draft. When accepted, the essay is saved to shared state and displayed in the center panel.
+
+### How HITL works here
+- Ask the assistant: “Write an essay about …”.
+- The agent calls the `write_essay` tool which uses `renderAndWaitForResponse` to show the draft.
+- You choose: **Accept Draft** (sends `SEND`) or **Ignore Draft** (sends `CANCEL`).
+- On accept, the UI saves the draft to shared state and renders it on the page.
+- The action uses `followUp: false` to prevent loops after approval.
 
 ## Prerequisites
 
 - Node.js 18+ 
-- Python 3.8+
+- Python 3.9+
 - OpenAI API Key (for the LlamaIndex agent)
 - [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - Any of the following package managers:
@@ -85,15 +92,20 @@ The following scripts can also be run using your preferred package manager:
 
 The main UI component is in `src/app/page.tsx`. You can:
 - Modify the theme colors and styling
-- Add new frontend actions
 - Customize the CopilotKit sidebar appearance
+- Inspect the HITL flow: the `write_essay` action uses `renderAndWaitForResponse` and saves the accepted draft to shared state (displayed on the page).
+
+Agent pieces:
+- `agent/agent/agent.py` defines the agent and exposes the frontend tool.
+- `agent/agent/server.py` runs the FastAPI server.
+- `src/app/api/copilotkit/route.ts` connects the UI to the agent via AG‑UI.
 
 ## 📚 Documentation
 
 - [LlamaIndex Documentation](https://docs.llamaindex.com/introduction) - Learn more about LlamaIndex and its features
 - [CopilotKit Documentation](https://docs.copilotkit.ai) - Explore CopilotKit's capabilities
 - [Next.js Documentation](https://nextjs.org/docs) - Learn about Next.js features and API
-- [YFinance Documentation](https://pypi.org/project/yfinance/) - Financial data tools
+
 
 ## Contributing
 
@@ -107,7 +119,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ### Agent Connection Issues
 If you see "I'm having trouble connecting to my tools", make sure:
-1. The LlamaIndex agent is running on port 8000
+1. The LlamaIndex agent is running on port 9000 (default when using `pnpm dev`/`npm run dev`). If you run `server.py` directly, it uses 8000—update `src/app/api/copilotkit/route.ts` accordingly.
 2. Your OpenAI API key is set correctly
 3. Both servers started successfully
 
