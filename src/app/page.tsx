@@ -30,6 +30,7 @@ export default function CopilotKitPage() {
     parameters: [
       { name: "draft", type: "string", description: "The draft of the essay", required: true },
     ],
+    followUp: false,
     renderAndWaitForResponse: ({ args, respond, status }) => {
       return (
         <div>
