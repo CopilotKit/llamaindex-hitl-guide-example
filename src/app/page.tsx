@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { WeatherCard } from "@/components/WeatherCard";
 
 import { useCoAgent, useCopilotAction } from "@copilotkit/react-core";
 import { Markdown } from "@copilotkit/react-ui"
