@@ -1,32 +1,13 @@
 "use client";
 
-import { useState } from "react";
-
 import { useCoAgent, useCopilotAction } from "@copilotkit/react-core";
 import { Markdown } from "@copilotkit/react-ui"
-import { CopilotKitCSSProperties, CopilotSidebar } from "@copilotkit/react-ui";
+import { CopilotSidebar } from "@copilotkit/react-ui";
 
 export default function CopilotKitPage() {
-  const [themeColor, setThemeColor] = useState("#6366f1");
-
-  // 🪁 Frontend Actions: https://docs.copilotkit.ai/guides/frontend-actions
-  useCopilotAction({
-    name: "change_theme_color",
-    parameters: [{
-      name: "theme_color",
-      description: "The theme color to set. Make sure to pick nice colors.",
-      required: true, 
-    }],
-    handler({ theme_color }) {
-      setThemeColor(theme_color);
-    },
-  });
-
-  
-
   return (
-    <main style={{ "--copilot-kit-primary-color": themeColor } as CopilotKitCSSProperties}>
-      <YourMainContent themeColor={themeColor} />
+    <main>
+      <YourMainContent />
       <CopilotSidebar
         clickOutsideToClose={false}
         defaultOpen={true}
@@ -44,7 +25,7 @@ type AgentState = {
   essay: string;
 }
 
-function YourMainContent({ themeColor }: { themeColor: string }) {
+function YourMainContent() {
   // 🪁 Shared State: https://docs.copilotkit.ai/coagents/shared-state
   const {state, setState} = useCoAgent<AgentState>({
     name: "sample_agent",
@@ -95,8 +76,7 @@ function YourMainContent({ themeColor }: { themeColor: string }) {
 
   return (
     <div
-      style={{ backgroundColor: themeColor }}
-      className="h-screen w-screen flex justify-center items-center flex-col transition-colors duration-300 ease-out"
+      className="h-screen w-screen flex justify-center items-center flex-col transition-colors duration-300 ease-out bg-indigo-500"
     >
       <div className="bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-xl max-w-2xl w-full">
         <h1 className="text-4xl font-bold text-white mb-2 text-center">Essay</h1>
