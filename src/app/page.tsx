@@ -76,7 +76,7 @@ function YourMainContent() {
 
   return (
     <div
-      className="h-screen w-screen flex justify-center items-center flex-col transition-colors duration-300 ease-out bg-indigo-500"
+      className="min-h-screen w-screen flex justify-center-safe items-center-safe py-4 flex-col transition-colors duration-300 ease-out"
     >
       <div className="bg-white/20 backdrop-blur-md p-8 rounded-2xl shadow-xl max-w-2xl w-full">
         <h1 className="text-4xl font-bold text-white mb-2 text-center">Essay</h1>
